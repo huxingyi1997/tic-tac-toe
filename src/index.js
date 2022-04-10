@@ -3,6 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 // 导入样式
 import "./index.css";
+import {getPosition, calculateWinner} from './utils.js';
 
 // Square 组件渲染了一个单独的 <button>
 // class Square extends React.Component {
@@ -81,6 +82,7 @@ class Board extends React.Component {
         // value={this.state.squares[i]}
         // onClick={() => this.handleClick(i)}
         // 从 Game 组件中接收 squares 和 onClick 这两个 props。
+        key={i % 3 + 1}
         value={this.props.squares[i]}
         onClick={() => this.props.onClick(i)}
       />
@@ -101,24 +103,22 @@ class Board extends React.Component {
     // } else {
     //   status = "下一步: " +  (this.state.xIsNext ? "X" : "O");
     // }
-
+    // 渲染改为行列循环遍历
+    const n = 3;
+    const looper = Array(n).fill().map((_, i) => i + 1);
     return (
       <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
+        {looper.map(row => {
+          return (
+            <div key={row} className="board-row">
+              {
+                looper.map(col => {
+                  return this.renderSquare((row - 1) * 3 + col - 1);
+                })
+              }
+            </div>
+          )
+        })}
       </div>
     );
   }
@@ -141,6 +141,7 @@ class Game extends React.Component {
       history: history.concat([
         {
           squares: squares,
+          position: i
         },
       ]),
       // squares: squares,
@@ -166,6 +167,8 @@ class Game extends React.Component {
       history: [
         {
           squares: Array(9).fill(null),
+          // 记录每个操作的位置
+          position: null,
         },
       ],
       // 步数
@@ -187,10 +190,12 @@ class Game extends React.Component {
     // 历史步骤映射为代表按钮的 React 元素，然后可以展示出一个按钮的列表，点击这些按钮，可以“跳转”到对应的历史步骤。
     const moves = history.map((step, move) => {
       const desc = move ? "跳转至第" + move + "步" : "游戏重新开始";
+      const className = move === step ? 'current-step' : '';
+      const position = getPosition(step.position);
       return (
         // 组件的 key 值并不需要在全局都保证唯一，只需要在当前的同一级元素之前保证唯一即可
         <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>{desc}</button>
+          <button className={className} onClick={() => this.jumpTo(move)}>{desc}{position}</button>
         </li>
       );
     });
@@ -224,26 +229,3 @@ class Game extends React.Component {
 // ========================================
 
 ReactDOM.render(<Game />, document.getElementById("root"));
-
-// 判断胜者
-function calculateWinner(squares) {
-  // 获胜的序号
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-    // 有人获胜
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
-    }
-  }
-  return null;
-}
