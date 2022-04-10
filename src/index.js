@@ -3,10 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 // 导入样式
 import "./index.css";
-<<<<<<< HEAD
-=======
 import {getPosition, calculateWinner} from './utils.js';
->>>>>>> gh-pages
 
 // Square 组件渲染了一个单独的 <button>
 // class Square extends React.Component {
