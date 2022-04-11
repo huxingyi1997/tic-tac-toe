@@ -3,9 +3,8 @@ export function getPosition(index) {
   if (typeof index !== 'number' || index < 0 || index > 9) {
     return '';
   }
-  console.log(index);
   let row = Math.floor(index / 3) + 1, col = index % 3 + 1;
-  let position = '(' + row + ', ' + col + ')';
+  let position = '(' + col + ', ' + row + ')';
   return position;
 }
 
@@ -27,7 +26,9 @@ export function calculateWinner(squares) {
     const [a, b, c] = lines[i];
     // 有人获胜
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+      // 返回赢者数组
+      return lines[i];
+      // return squares[a];
     }
   }
   return null;

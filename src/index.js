@@ -3,7 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 // 导入样式
 import "./index.css";
-import {getPosition, calculateWinner} from './utils.js';
+import { getPosition, calculateWinner } from './utils.js';
 
 // Square 组件渲染了一个单独的 <button>
 // class Square extends React.Component {
@@ -40,7 +40,7 @@ import {getPosition, calculateWinner} from './utils.js';
 // 组件只包含一个 render 方法，并且不包含 state，那么使用函数组件简化
 function Square(props) {
   return (
-    <button className="square" onClick={props.onClick}>
+    <button className={props.className} onClick={props.onClick}>
       {props.value}
     </button>
   );
@@ -76,6 +76,9 @@ class Board extends React.Component {
 
   renderSquare(i) {
     // return <Square />;
+    const className = this.props.winner ?
+          this.props.winner.includes(i) ? 
+          'square win' : 'square' : 'square';
     // 增加参数，修改一下 Square 的点击事件监听函数
     return (
       <Square
@@ -84,6 +87,7 @@ class Board extends React.Component {
         // 从 Game 组件中接收 squares 和 onClick 这两个 props。
         key={i % 3 + 1}
         value={this.props.squares[i]}
+        className = {className}
         onClick={() => this.props.onClick(i)}
       />
     );
@@ -128,25 +132,35 @@ class Board extends React.Component {
 class Game extends React.Component {
   // 点击事件
   handleClick(i) {
-    // 历史,丢弃stepNumber后的数据
-    const history = this.state.history.slice(0, this.state.stepNumber + 1);
+    // 历史，丢弃stepNumber后的数据，注意反向后的表达式
+    let history = this.state.isStepsReverse ? this.state.history.slice(this.state.stepNumber) : this.state.history.slice(0, this.state.stepNumber + 1);
     // 当前状态
-    const current = history[history.length - 1];
+    const current = this.state.isStepsReverse ? history[0] : history[history.length - 1];
     const squares = current.squares.slice();
     // 当有玩家胜出时，或者某个 Square 已经被填充时，该函数不做任何处理直接返回
     if (calculateWinner(squares) || squares[i]) return;
     // 根据xIsNext判断
     squares[i] = this.state.xIsNext ? "X" : "O";
-    this.setState({
-      history: history.concat([
+    // 拼接历史列表
+    history = this.state.isStepsReverse ?
+      [
         {
           squares: squares,
           position: i
         },
-      ]),
+      ].concat(history.slice()) :
+      history.slice().concat([
+        {
+          squares: squares,
+          position: i
+        },
+      ]);
+    const stepNumber = this.state.isStepsReverse ? 0 : history.length - 1;
+    this.setState({
+      history,
       // squares: squares,
       // 更新时间步
-      stepNumber: history.length,
+      stepNumber,
       // 翻转xIsNext
       xIsNext: !this.state.xIsNext,
     });
@@ -160,6 +174,14 @@ class Game extends React.Component {
     });
   }
 
+  // 反转历史记录
+  reverseSteps() {
+    this.setState({
+      history: this.state.history.slice().reverse(),
+      isStepsReverse: !this.state.isStepsReverse,
+      stepNumber: this.state.history.length - 1 - this.state.stepNumber,
+    })
+  }
   // 为 Game 组件添加构造函数，保存历史步骤列表
   constructor(props) {
     super(props);
@@ -175,6 +197,8 @@ class Game extends React.Component {
       stepNumber: 0,
       // 将 “X” 默认设置为先手棋
       xIsNext: true,
+      // 历史步骤是否逆序
+      isStepsReverse: false
     };
   }
 
@@ -185,11 +209,14 @@ class Game extends React.Component {
     // 当前状态，将代码从始终根据最后一次移动渲染修改为根据当前 stepNumber 渲染
     const current = history[this.state.stepNumber];
     // 计算胜者
-    const winner = calculateWinner(current.squares);
-
+    const winnerIndex = calculateWinner(current.squares);
+    const winner = winnerIndex ? current.squares[winnerIndex[0]] : null;
+    // 计算平局
+    const isDraw = !winner && !current.squares.includes(null);
     // 历史步骤映射为代表按钮的 React 元素，然后可以展示出一个按钮的列表，点击这些按钮，可以“跳转”到对应的历史步骤。
     const moves = history.map((step, move) => {
-      const desc = move ? "跳转至第" + move + "步" : "游戏重新开始";
+      const display_moves = this.state.isStepsReverse ? history.length - move - 1 : move;
+      const desc = display_moves ? "跳转至第" + display_moves + "步" : "游戏重新开始";
       const className = move === step ? 'current-step' : '';
       const position = getPosition(step.position);
       return (
@@ -204,20 +231,27 @@ class Game extends React.Component {
     // 判断是否获胜
     if (winner) {
       status = "胜者：" + winner;
+    } else if (isDraw) {
+      status = "平局";
     } else {
       status = "下一步: " + (this.state.xIsNext ? "X" : "O");
     }
+    // 状态
+    const isStepsReverse = this.state.isStepsReverse;
+    let reverseButton = isStepsReverse ? "历史记录逆序" : "历史记录顺序";
 
     return (
       <div className="game">
         <div className="game-board">
           <Board
             // 绑定参数和事件
+            winner={winnerIndex}
             squares={current.squares}
             onClick={(i) => this.handleClick(i)}
           />
         </div>
         <div className="game-info">
+          <button onClick={() => { this.reverseSteps() }}>{reverseButton}</button>
           <div>{status}</div>
           <ol>{moves}</ol>
         </div>

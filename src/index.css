@@ -33,6 +33,10 @@ ul {
   width: 34px;
 }
 
+.win {
+  background-color: rgba(205, 16, 59, .8);
+}
+
 .square:focus {
   outline: none;
 }
