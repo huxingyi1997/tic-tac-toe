@@ -1,11 +1,18 @@
 body {
-  font: 14px "Century Gothic", Futura, sans-serif;
-  margin: 20px;
+  font: 40px "Century Gothic", Futura, sans-serif;
+  background: pink;
 }
 
 ol,
 ul {
   padding-left: 30px;
+}
+
+button {
+  font-size: 20px;
+  background-color: transparent;
+  border: 0px;
+  color: purple;
 }
 
 .board-row:after {
@@ -19,41 +26,78 @@ ul {
 }
 
 .square {
-  background: #fff;
-  border: 1px solid #999;
+  background-color: pink;
+  border: 5px solid red;
   float: left;
-  font-size: 24px;
-  font-weight: bold;
-  line-height: 34px;
-  height: 34px;
-  margin-right: -1px;
-  margin-top: -1px;
+  font-size: 40px;
+  line-height: 80px;
+  height: 80px;
+  margin-right: -5px;
+  margin-top: -5px;
   padding: 0;
   text-align: center;
-  width: 34px;
+  width: 80px;
 }
 
 .win {
-  background-color: rgba(205, 16, 59, .8);
+  background-color: rgba(255, 114, 227, .8);
 }
 
 .square:focus {
   outline: none;
-}
-
-.kbd-navigation .square:focus {
-  background: #ddd;
+  background-color: rgba(255, 114, 227, .8);
+  font-weight: bold;
 }
 
 .game {
   display: flex;
-  flex-direction: row;
-}
-
-.game-info {
-  margin-left: 20px;
+  align-items: flex-start;
+  justify-content: center;
 }
 
 .current-step {
   font-weight: bold;
+}
+
+.game-title {
+  width: 200px;
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.player1 {
+  color: black;
+}
+
+.player2 {
+  color: white;
+}
+
+.draw {
+  color: red;
+}
+
+.status {
+  margin: 20px;
+  font-size: 40px;
+}
+
+.game-board {
+  width: 240px;
+}
+
+.game-info {
+  width: 240px;
+  font-size: 20px;
+}
+
+.reverse-steps {
+  margin: 5px 20px;
+}
+
+.history-list {
+  color: purple;
 }
